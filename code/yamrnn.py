@@ -52,7 +52,7 @@ def main():
 	u=embed[x]
 	mu=u.dimshuffle((1,0,2))
 	mt=t.dimshuffle((1,0))
-	vh,liscanupdate=theano.scan(fn=rnnforward,sequences=mu,truncate_gradient=-1,outputs_info=[vh],non_sequences=liparameter)
+	vh,liscanupdate=theano.scan(fn=forward,sequences=mu,truncate_gradient=-1,outputs_info=[vh],non_sequences=liparameter)
 	mu=T.dot(vh,W2)+b2
 	(ud1,ud2,ud3)=mu.shape
 	y=T.nnet.softmax(mu.reshape((ud1*ud2,ud3))).reshape((ud1,ud2,ud3))
@@ -115,10 +115,10 @@ def adam(liparameter,ligradient,a=0.001,b1=0.9,b2=0.999,e=1e-6):
 		liupdate.append((pc,pn))
 	return liupdate
 
-# rnnforward
-def rnnforward(x,vh,W10a,W10b,b10,W11a,b11):
+# forward
+def forward(x,vh,W10a,W10b,b10,W11a,b11):
 	v0=T.nnet.sigmoid(T.dot(x,W10a)+b10+T.dot(vh,W10b))
-	v1=        T.tanh(T.dot(x,W11a)+b11)
+	v1=T.tanh(T.dot(x,W11a)+b11)
 	vh=(1-v1)-vh*v0-v1+v1**2*(1-v0)
 	return vh
 
