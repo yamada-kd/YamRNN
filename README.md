@@ -2,7 +2,7 @@
 **Ya**mada **m**odified **RNN**
 
 ## Abstract
-YamRNN is a recurrent neural network architecture with smaller parameters.
+Recurrent neural networks (RNNs) are among the most promising of the many artificial intelligence techniques now under development, showing great potential for memory, interaction, and linguistic understanding. Among the more sophisticated RNNs are long short-term memory (LSTM) and gated recurrent units (GRUs), which emulate animal brain behavior; these methods yield superior memory and learning speed because of the excellent core structure of their architectures. In this study, we attempted to make further improvements in core structure and develop a novel, compact architecture with a high learning speed. We stochastically generated 30,000 RNN architectures, evaluated their performance, and selected the one most capable of memorizing long contexts with relatively few parameters. This RNN, YamRNN, had fewer parameters than LSTM and GRU by a factor of two-thirds or better and reduced the time required to achieve the same learning performance on a sequence classification task as LSTM and GRU by 80% at maximum. This novel RNN architecture is expected to be useful for addressing problems such as predictions and analyses on contextual data and also suggests that there is room for the development of better architectures.
 
 ## Implementation of RNNs
 ### YamRNN
