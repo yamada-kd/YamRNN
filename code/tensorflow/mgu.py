@@ -21,16 +21,16 @@ def main():
 	
 	# ネットワークの定義
 	model=Network()
-	cce=tf.keras.losses.SparseCategoricalCrossentropy() #これでロス関数を生成する．
+	cce=tf.keras.losses.SparseCategoricalCrossentropy()
 	acc=tf.keras.metrics.SparseCategoricalAccuracy()
-	optimizer=tf.keras.optimizers.Adam() #これでオプティマイザーを生成する．
+	optimizer=tf.keras.optimizers.Adam()
 	
 	# デコレータ
 	@tf.function
 	def inference(tx,tt):
 		with tf.GradientTape() as tape:
 			ty=model.call(tx)
-			traincost=cce(tt,ty) #正解と出力の順番はこの通りにする必要がある．
+			traincost=cce(tt,ty)
 		gradient=tape.gradient(traincost,model.trainable_variables)
 		optimizer.apply_gradients(zip(gradient,model.trainable_variables))
 		trainacc=acc(tt,ty)
