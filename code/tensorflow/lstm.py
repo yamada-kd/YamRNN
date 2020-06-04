@@ -41,7 +41,7 @@ def main():
 class Network(tf.keras.layers.Layer):
 	def __init__(self):
 		super(Network,self).__init__()
-		self.lstm=tf.keras.layers.RNN(SLSTMCell(10))
+		self.lstm=tf.keras.layers.RNN(MyLSTMCell(10))
 		self.fc=tf.keras.layers.Dense(4,activation="softmax")
 	
 	def call(self,tx):
@@ -49,9 +49,9 @@ class Network(tf.keras.layers.Layer):
 		ty=self.fc(ty)
 		return ty
 
-class SLSTMCell(tf.keras.layers.AbstractRNNCell,recurrent.DropoutRNNCellMixin):
+class MyLSTMCell(tf.keras.layers.AbstractRNNCell,recurrent.DropoutRNNCellMixin):
 	def __init__(self,units,activation="tanh",recurrent_activation="sigmoid",use_bias=True,kernel_initializer="glorot_uniform",recurrent_initializer="orthogonal",bias_initializer="zeros",kernel_regularizer=None,recurrent_regularizer=None,bias_regularizer=None,kernel_constraint=None,recurrent_constraint=None,bias_constraint=None,dropout=0.,recurrent_dropout=0.,**kwargs):
-		super(SLSTMCell,self).__init__(**kwargs)
+		super(MyLSTMCell,self).__init__(**kwargs)
 		self.units=units
 		self.activation=activations.get(activation)
 		self.recurrent_activation=activations.get(recurrent_activation)
@@ -74,10 +74,10 @@ class SLSTMCell(tf.keras.layers.AbstractRNNCell,recurrent.DropoutRNNCellMixin):
 	
 	def build(self,input_shape):
 		input_dim=input_shape[-1]
-		self.kernel=self.add_weight(shape=(input_dim,self.units*2),name="kernel",initializer=self.kernel_initializer,regularizer=self.kernel_regularizer,constraint=self.kernel_constraint)
-		self.recurrent_kernel=self.add_weight(shape=(self.units,self.units*2),name="recurrent_kernel",initializer=self.recurrent_initializer,regularizer=self.recurrent_regularizer,constraint=self.recurrent_constraint)
+		self.kernel=self.add_weight(shape=(input_dim,self.units*4),name="kernel",initializer=self.kernel_initializer,regularizer=self.kernel_regularizer,constraint=self.kernel_constraint)
+		self.recurrent_kernel=self.add_weight(shape=(self.units,self.units*4),name="recurrent_kernel",initializer=self.recurrent_initializer,regularizer=self.recurrent_regularizer,constraint=self.recurrent_constraint)
 		if self.use_bias:
-			self.bias=self.add_weight(shape=(self.units*2,),name="bias",initializer=self.bias_initializer,regularizer=self.bias_regularizer,constraint=self.bias_constraint)
+			self.bias=self.add_weight(shape=(self.units*4,),name="bias",initializer=self.bias_initializer,regularizer=self.bias_regularizer,constraint=self.bias_constraint)
 		else:
 			self.bias=None
 		self.built=True
@@ -86,37 +86,51 @@ class SLSTMCell(tf.keras.layers.AbstractRNNCell,recurrent.DropoutRNNCellMixin):
 		vh=states[0]
 		vs=states[1]
 		
-		dp_mask=self.get_dropout_mask_for_cell(inputs,training,count=2)
-		rec_dp_mask=self.get_recurrent_dropout_mask_for_cell(vh,training,count=2)
+		dp_mask=self.get_dropout_mask_for_cell(inputs,training,count=4)
+		rec_dp_mask=self.get_recurrent_dropout_mask_for_cell(vh,training,count=4)
 		
 		if 0.<self.dropout<1.:
 			input1=inputs*dp_mask[0]
 			input2=inputs*dp_mask[1]
+			input3=inputs*dp_mask[2]
+			input4=inputs*dp_mask[3]
 		else:
 			input1=inputs
 			input2=inputs
+			input3=inputs
+			input4=inputs
 		
 		p11=K.dot(input1,self.kernel[:,:self.units])
-		p21=K.dot(input2,self.kernel[:,self.units:])
+		p21=K.dot(input2,self.kernel[:,self.units:2*self.units])
+		p31=K.dot(input3,self.kernel[:,2*self.units:3*self.units])
+		p41=K.dot(input4,self.kernel[:,3*self.units:])
 		if self.use_bias:
 			p11=K.bias_add(p11,self.bias[:self.units])
-			p21=K.bias_add(p21,self.bias[self.units:])
+			p21=K.bias_add(p21,self.bias[self.units:2*self.units])
+			p31=K.bias_add(p31,self.bias[2*self.units:3*self.units])
+			p41=K.bias_add(p41,self.bias[3*self.units:])
 		if 0.<self.recurrent_dropout<1.:
 			vh1=vh*rec_dp_mask[0]
 			vh2=vh*rec_dp_mask[1]
+			vh3=vh*rec_dp_mask[2]
+			vh4=vh*rec_dp_mask[3]
 		else:
 			vh1=vh
 			vh2=vh
+			vh3=vh
+			vh4=vh
 		
-		v1=self.recurrent_activation(p11+K.dot(vh1,self.recurrent_kernel[:,:self.units]))
-		v2=self.activation(p21+K.dot(vh2,self.recurrent_kernel[:,self.units:]))
-		vs=v1*vs+(1-v1)*v2
-		vh=self.activation(vs)
+		v1=          self.activation(p11+K.dot(vh1,self.recurrent_kernel[:,:self.units]))
+		v2=self.recurrent_activation(p21+K.dot(vh2,self.recurrent_kernel[:,self.units:2*self.units]))
+		v3=self.recurrent_activation(p31+K.dot(vh3,self.recurrent_kernel[:,2*self.units:3*self.units]))
+		v4=self.recurrent_activation(p41+K.dot(vh4,self.recurrent_kernel[:,3*self.units:]))
+		vs=v1*v2+v3*vs
+		vh=v4*self.activation(vs)
 		return vh,[vh,vs]
 	
 	def get_config(self):
 		config={"units":self.units,"activation":activations.serialize(self.activation),"recurrent_activation":activations.serialize(self.recurrent_activation),"use_bias":self.use_bias,"kernel_initializer":initializers.serialize(self.kernel_initializer),"recurrent_initializer":initializers.serialize(self.recurrent_initializer),"bias_initializer":initializers.serialize(self.bias_initializer),"kernel_regularizer":regularizers.serialize(self.kernel_regularizer),"recurrent_regularizer":regularizers.serialize(self.recurrent_regularizer),"bias_regularizer":regularizers.serialize(self.bias_regularizer),"kernel_constraint":constraints.serialize(self.kernel_constraint),"recurrent_constraint":constraints.serialize(self.recurrent_constraint),"bias_constraint":constraints.serialize(self.bias_constraint),"dropout":self.dropout,"recurrent_dropout":self.recurrent_dropout}
-		base_config=super(SLSTMCell,self).get_config()
+		base_config=super(MyLSTMCell,self).get_config()
 		return dict(list(base_config.items())+list(config.items()))
 
 if __name__ == "__main__":

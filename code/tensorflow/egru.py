@@ -41,7 +41,7 @@ def main():
 class Network(tf.keras.layers.Layer):
 	def __init__(self):
 		super(Network,self).__init__()
-		self.lstm=tf.keras.layers.RNN(MGUCell(5))
+		self.lstm=tf.keras.layers.RNN(EGRUCell(5))
 		self.fc=tf.keras.layers.Dense(4,activation="softmax")
 	
 	def call(self,tx):
@@ -49,12 +49,11 @@ class Network(tf.keras.layers.Layer):
 		ty=self.fc(ty)
 		return ty
 
-class MGUCell(tf.keras.layers.AbstractRNNCell,recurrent.DropoutRNNCellMixin):
-	def __init__(self,units,activation="tanh",recurrent_activation="sigmoid",use_bias=True,kernel_initializer="glorot_uniform",recurrent_initializer="orthogonal",bias_initializer="zeros",kernel_regularizer=None,recurrent_regularizer=None,bias_regularizer=None,kernel_constraint=None,recurrent_constraint=None,bias_constraint=None,dropout=0.,recurrent_dropout=0.,**kwargs):
-		super(MGUCell,self).__init__(**kwargs)
+class EGRUCell(tf.keras.layers.AbstractRNNCell,recurrent.DropoutRNNCellMixin):
+	def __init__(self,units,activation="softsign",use_bias=True,kernel_initializer="glorot_uniform",recurrent_initializer="orthogonal",bias_initializer="zeros",kernel_regularizer=None,recurrent_regularizer=None,bias_regularizer=None,kernel_constraint=None,recurrent_constraint=None,bias_constraint=None,dropout=0.,recurrent_dropout=0.,**kwargs):
+		super(EGRUCell,self).__init__(**kwargs)
 		self.units=units
 		self.activation=activations.get(activation)
-		self.recurrent_activation=activations.get(recurrent_activation)
 		self.use_bias=use_bias
 		self.kernel_initializer=initializers.get(kernel_initializer)
 		self.recurrent_initializer=initializers.get(recurrent_initializer)
@@ -95,11 +94,6 @@ class MGUCell(tf.keras.layers.AbstractRNNCell,recurrent.DropoutRNNCellMixin):
 			input1=inputs
 			input2=inputs
 		
-		p11=K.dot(input1,self.kernel[:,:self.units])
-		p21=K.dot(input2,self.kernel[:,self.units:])
-		if self.use_bias:
-			p11=K.bias_add(p11,self.bias[:self.units])
-			p21=K.bias_add(p21,self.bias[self.units:])
 		if 0.<self.recurrent_dropout<1.:
 			vh1=vh*rec_dp_mask[0]
 			vh2=vh*rec_dp_mask[1]
@@ -107,14 +101,20 @@ class MGUCell(tf.keras.layers.AbstractRNNCell,recurrent.DropoutRNNCellMixin):
 			vh1=vh
 			vh2=vh
 		
-		v1=self.recurrent_activation(p11+K.dot(vh1,self.recurrent_kernel[:,:self.units]))
-		v2=self.activation(p21+K.dot(vh2*v1,self.recurrent_kernel[:,self.units:]))
+		p11=K.dot(input1,self.kernel[:,:self.units])
+		p21=K.dot(input2,self.kernel[:,self.units:])
+		if self.use_bias:
+			p11=K.bias_add(p11,self.bias[:self.units])
+			p21=K.bias_add(p21,self.bias[self.units:])
+		
+		v1=(self.activation(p11+K.dot(vh1,self.recurrent_kernel[:,:self.units]))+1)/2
+		v2=self.activation(p21+K.dot(vh2,self.recurrent_kernel[:,self.units:]))
 		vh=(1-v1)*vh+v1*v2
 		return vh,[vh]
 	
 	def get_config(self):
-		config={"units":self.units,"activation":activations.serialize(self.activation),"recurrent_activation":activations.serialize(self.recurrent_activation),"use_bias":self.use_bias,"kernel_initializer":initializers.serialize(self.kernel_initializer),"recurrent_initializer":initializers.serialize(self.recurrent_initializer),"bias_initializer":initializers.serialize(self.bias_initializer),"kernel_regularizer":regularizers.serialize(self.kernel_regularizer),"recurrent_regularizer":regularizers.serialize(self.recurrent_regularizer),"bias_regularizer":regularizers.serialize(self.bias_regularizer),"kernel_constraint":constraints.serialize(self.kernel_constraint),"recurrent_constraint":constraints.serialize(self.recurrent_constraint),"bias_constraint":constraints.serialize(self.bias_constraint),"dropout":self.dropout,"recurrent_dropout":self.recurrent_dropout}
-		base_config=super(MGUCell,self).get_config()
+		config={"units":self.units,"activation":activations.serialize(self.activation),"use_bias":self.use_bias,"kernel_initializer":initializers.serialize(self.kernel_initializer),"recurrent_initializer":initializers.serialize(self.recurrent_initializer),"bias_initializer":initializers.serialize(self.bias_initializer),"kernel_regularizer":regularizers.serialize(self.kernel_regularizer),"recurrent_regularizer":regularizers.serialize(self.recurrent_regularizer),"bias_regularizer":regularizers.serialize(self.bias_regularizer),"kernel_constraint":constraints.serialize(self.kernel_constraint),"recurrent_constraint":constraints.serialize(self.recurrent_constraint),"bias_constraint":constraints.serialize(self.bias_constraint),"dropout":self.dropout,"recurrent_dropout":self.recurrent_dropout}
+		base_config=super(EGRUCell,self).get_config()
 		return dict(list(base_config.items())+list(config.items()))
 
 if __name__ == "__main__":
