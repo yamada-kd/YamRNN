@@ -36,12 +36,12 @@ def main():
 	np.random.seed(SEED)
 	
 	# Parameter for MGU layer
-	W10a=theano.shared(value=np.asarray(np.random.uniform(low=-0.2,high=0.2,size=(EMBEDUNIT,RNNUNITSIZE)),dtype=theano.config.floatX),name="W10a")
-	W10b=theano.shared(value=np.asarray(np.random.uniform(low=-0.2,high=0.2,size=(RNNUNITSIZE,RNNUNITSIZE)),dtype=theano.config.floatX),name="W10b")
-	b10=theano.shared(value=np.asarray(np.random.uniform(low=-0.2,high=0.2,size=(RNNUNITSIZE)),dtype=theano.config.floatX),name="b10")
-	W11a=theano.shared(value=np.asarray(np.random.uniform(low=-0.2,high=0.2,size=(EMBEDUNIT,RNNUNITSIZE)),dtype=theano.config.floatX),name="W11a")
-	W11b=theano.shared(value=np.asarray(np.random.uniform(low=-0.2,high=0.2,size=(RNNUNITSIZE,RNNUNITSIZE)),dtype=theano.config.floatX),name="W11b")
-	b11=theano.shared(value=np.asarray(np.random.uniform(low=-0.2,high=0.2,size=(RNNUNITSIZE)),dtype=theano.config.floatX),name="b11")
+	W10a=theano.shared(value=np.asarray(np.random.uniform(low=-DISTPARAMETER,high=DISTPARAMETER,size=(EMBEDUNIT,RNNUNITSIZE)),dtype=theano.config.floatX),name="W10a")
+	W10b=theano.shared(value=np.asarray(np.random.uniform(low=-DISTPARAMETER,high=DISTPARAMETER,size=(RNNUNITSIZE,RNNUNITSIZE)),dtype=theano.config.floatX),name="W10b")
+	b10=theano.shared(value=np.asarray(np.random.uniform(low=-DISTPARAMETER,high=DISTPARAMETER,size=(RNNUNITSIZE)),dtype=theano.config.floatX),name="b10")
+	W11a=theano.shared(value=np.asarray(np.random.uniform(low=-DISTPARAMETER,high=DISTPARAMETER,size=(EMBEDUNIT,RNNUNITSIZE)),dtype=theano.config.floatX),name="W11a")
+	W11b=theano.shared(value=np.asarray(np.random.uniform(low=-DISTPARAMETER,high=DISTPARAMETER,size=(RNNUNITSIZE,RNNUNITSIZE)),dtype=theano.config.floatX),name="W11b")
+	b11=theano.shared(value=np.asarray(np.random.uniform(low=-DISTPARAMETER,high=DISTPARAMETER,size=(RNNUNITSIZE)),dtype=theano.config.floatX),name="b11")
 	liparameter=[W10a,W10b,b10,W11a,W11b,b11]
 	vh=theano.shared(value=np.asarray(np.zeros(shape=(MINIBATCHSIZE,RNNUNITSIZE)),dtype=theano.config.floatX),name="vh")
 	

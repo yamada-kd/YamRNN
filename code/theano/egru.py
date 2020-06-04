@@ -35,15 +35,14 @@ def main():
 	embed=theano.shared(value=np.asarray(embedlong[:LENGTH,:],dtype=theano.config.floatX))
 	np.random.seed(SEED)
 	
-	# Parameter for S-LSTM layer
-	W11=theano.shared(value=np.asarray(np.random.uniform(low=-DISTPARAMETER,high=DISTPARAMETER,size=(EMBEDUNIT,RNNUNITSIZE)),dtype=theano.config.floatX),name="W11")
-	W12=theano.shared(value=np.asarray(np.random.uniform(low=-DISTPARAMETER,high=DISTPARAMETER,size=(RNNUNITSIZE,RNNUNITSIZE)),dtype=theano.config.floatX),name="W12")
-	W13=theano.shared(value=np.asarray(np.random.uniform(low=-DISTPARAMETER,high=DISTPARAMETER,size=(EMBEDUNIT,RNNUNITSIZE)),dtype=theano.config.floatX),name="W13")
-	W14=theano.shared(value=np.asarray(np.random.uniform(low=-DISTPARAMETER,high=DISTPARAMETER,size=(RNNUNITSIZE,RNNUNITSIZE)),dtype=theano.config.floatX),name="W14")
+	# Parameter for MGU layer
+	W10a=theano.shared(value=np.asarray(np.random.uniform(low=-DISTPARAMETER,high=DISTPARAMETER,size=(EMBEDUNIT,RNNUNITSIZE)),dtype=theano.config.floatX),name="W10a")
+	W10b=theano.shared(value=np.asarray(np.random.uniform(low=-DISTPARAMETER,high=DISTPARAMETER,size=(RNNUNITSIZE,RNNUNITSIZE)),dtype=theano.config.floatX),name="W10b")
+	b10=theano.shared(value=np.asarray(np.random.uniform(low=-DISTPARAMETER,high=DISTPARAMETER,size=(RNNUNITSIZE)),dtype=theano.config.floatX),name="b10")
+	W11a=theano.shared(value=np.asarray(np.random.uniform(low=-DISTPARAMETER,high=DISTPARAMETER,size=(EMBEDUNIT,RNNUNITSIZE)),dtype=theano.config.floatX),name="W11a")
+	W11b=theano.shared(value=np.asarray(np.random.uniform(low=-DISTPARAMETER,high=DISTPARAMETER,size=(RNNUNITSIZE,RNNUNITSIZE)),dtype=theano.config.floatX),name="W11b")
 	b11=theano.shared(value=np.asarray(np.random.uniform(low=-DISTPARAMETER,high=DISTPARAMETER,size=(RNNUNITSIZE)),dtype=theano.config.floatX),name="b11")
-	b12=theano.shared(value=np.asarray(np.random.uniform(low=-DISTPARAMETER,high=DISTPARAMETER,size=(RNNUNITSIZE)),dtype=theano.config.floatX),name="b12")
-	liparameter=[W11,W12,W13,W14,b11,b12]
-	vs=theano.shared(value=np.asarray(np.zeros(shape=(MINIBATCHSIZE,RNNUNITSIZE)),dtype=theano.config.floatX),name="vs")
+	liparameter=[W10a,W10b,b10,W11a,W11b,b11]
 	vh=theano.shared(value=np.asarray(np.zeros(shape=(MINIBATCHSIZE,RNNUNITSIZE)),dtype=theano.config.floatX),name="vh")
 	
 	# Parameter for fully connected layer
@@ -54,7 +53,7 @@ def main():
 	u=embed[x]
 	mu=u.dimshuffle((1,0,2))
 	mt=t.dimshuffle((1,0))
-	[vh,vs],liscanupdate=theano.scan(fn=forward,sequences=mu,truncate_gradient=-1,outputs_info=[vh,vs],non_sequences=liparameter)
+	vh,liscanupdate=theano.scan(fn=forward,sequences=mu,truncate_gradient=-1,outputs_info=[vh],non_sequences=liparameter)
 	mu=T.dot(vh,W2)+b2
 	(ud1,ud2,ud3)=mu.shape
 	y=T.nnet.softmax(mu.reshape((ud1*ud2,ud3))).reshape((ud1,ud2,ud3))
@@ -118,12 +117,11 @@ def adam(liparameter,ligradient,a=0.001,b1=0.9,b2=0.999,e=1e-6):
 	return liupdate
 
 # forward
-def forward(x,vh,vs,W11,W12,W13,W14,b11,b12):
-	v1=T.nnet.sigmoid(T.dot(x,W11)+T.dot(vh,W12)+b11)
-	v2=T.tanh(T.dot(x,W13)+T.dot(vh,W14)+b12)
-	vs=v1*vs+(1-v1)*v2
-	vh=T.tanh(vs)
-	return vh,vs
+def forward(x,vh,W10a,W10b,b10,W11a,W11b,b11):
+	v0=(T.nnet.softsign(T.dot(x,W10a)+b10+T.dot(vh,W10b))+1)/2
+	v1=T.nnet.softsign(T.dot(x,W11a)+b11+T.dot(vh,W11b))
+	vh=(1-v0)*vh+v0*v1
+	return vh
 
 if __name__ == '__main__':
 	main()

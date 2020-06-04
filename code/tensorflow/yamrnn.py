@@ -7,7 +7,7 @@ from tensorflow.python.keras.layers import recurrent
 import numpy as np
 
 def main():
-	# データセットの生成
+	# Sample dataset
 	tx=[[[1.1],[2.2],[3.0],[4.0]],[[2.0],[3.0],[4.0],[1.0]],[[2.0],[3.0],[4.0]]]
 	tx=tf.keras.preprocessing.sequence.pad_sequences(tx,padding="post",dtype=np.float32)
 	tt=[1,2,3]
@@ -18,15 +18,14 @@ def main():
 #	rnn=tf.keras.layers.Bidirectional(tf.keras.layers.RNN(YamRNNCell(4,dropout=0.3),return_sequences=True))
 #	print(rnn(tx,training=True))
 #	print(rnn(tx))
-#	exit()
 	
-	# ネットワークの定義
+	# Network
 	model=Network()
 	cce=tf.keras.losses.SparseCategoricalCrossentropy()
 	acc=tf.keras.metrics.SparseCategoricalAccuracy()
 	optimizer=tf.keras.optimizers.Adam()
 	
-	# デコレータ
+	# Decorator
 	@tf.function
 	def inference(tx,tt):
 		with tf.GradientTape() as tape:
@@ -37,7 +36,7 @@ def main():
 		trainacc=acc(tt,ty)
 		return traincost,trainacc
 	
-	# 学習ループ
+	# Inference
 	for epoch in range(1,1000+1):
 		traincost,trainacc=inference(tx,tt)
 		if epoch%10==0:
