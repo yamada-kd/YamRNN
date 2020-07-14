@@ -12,12 +12,12 @@ Code for Tensorflow (version 2.0 or later): [code/tensorflow/yamrnn.py](https://
 
 Code for Theano: [code/theano/yamrnn.py](https://github.com/yamada-kd/YamRNN/blob/master/code/theano/yamrnn.py)
 
-### Minimal Gated Unit (MGU)
-Paper: [Minimal gated unit for recurrent neural networks](https://link.springer.com/article/10.1007/s11633-016-1006-2)
+### LSTM
+Paper: [Learning to forget: Continual prediction with lstm](https://www.mitpressjournals.org/doi/10.1162/089976600300015015)
 
-Code for Tensorflow (version 2.0 or later): [code/tensorflow/mgu.py](https://github.com/yamada-kd/YamRNN/blob/master/code/tensorflow/mgu.py)
+Code for Tensorflow (version 2.0 or later): [code/tensorflow/lstm.py](https://github.com/yamada-kd/YamRNN/blob/master/code/tensorflow/lstm.py)
 
-Code for Theano: [code/theano/mgu.py](https://github.com/yamada-kd/YamRNN/blob/master/code/theano/mgu.py)
+Code for Theano: [code/theano/lstm.py](https://github.com/yamada-kd/YamRNN/blob/master/code/theano/lstm.py)
 
 ### Simplified LSTM (S-LSTM)
 Paper: [Investigating gated recurrent neural networks for speech synthesis](https://arxiv.org/abs/1601.02539)
@@ -25,3 +25,18 @@ Paper: [Investigating gated recurrent neural networks for speech synthesis](http
 Code for Tensorflow (version 2.0 or later): [code/tensorflow/slstm.py](https://github.com/yamada-kd/YamRNN/blob/master/code/tensorflow/slstm.py)
 
 Code for Theano: [code/theano/slstm.py](https://github.com/yamada-kd/YamRNN/blob/master/code/theano/slstm.py)
+
+### GRU
+Paper: [Learning phrase representations using rnn encoder-decoder for statistical machine translation](https://www.aclweb.org/anthology/D14-1179/)
+
+Code for Tensorflow (version 2.0 or later): [code/tensorflow/gru.py](https://github.com/yamada-kd/YamRNN/blob/master/code/tensorflow/gru.py)
+
+Code for Theano: [code/theano/gru.py](https://github.com/yamada-kd/YamRNN/blob/master/code/theano/gru.py)
+
+### Minimal Gated Unit (MGU)
+Paper: [Minimal gated unit for recurrent neural networks](https://link.springer.com/article/10.1007/s11633-016-1006-2)
+
+Code for Tensorflow (version 2.0 or later): [code/tensorflow/mgu.py](https://github.com/yamada-kd/YamRNN/blob/master/code/tensorflow/mgu.py)
+
+Code for Theano: [code/theano/mgu.py](https://github.com/yamada-kd/YamRNN/blob/master/code/theano/mgu.py)
+
