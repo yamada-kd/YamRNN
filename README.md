@@ -1,4 +1,4 @@
-# YamRNN
+﻿# YamRNN
 **Ya**mada **m**odified **RNN**
 
 ## Abstract
@@ -6,7 +6,7 @@ Recurrent neural networks (RNNs) are among the most promising of the many artifi
 
 ## Implementation of RNNs
 ### YamRNN
-Paper: [Developing a novel recurrent neural network architecture with fewer parameters and good learning performance](https://www.biorxiv.org/content/10.1101/2020.04.08.031484v1)
+Paper: [Developing a novel recurrent neural network architecture with fewer parameters and good learning performance](https://www.jstage.jst.go.jp/article/iis/advpub/0/advpub_2020.R.01/_article/-char/en)
 
 Code for Tensorflow (version 2.0 or later): [code/tensorflow/yamrnn.py](https://github.com/yamada-kd/YamRNN/blob/master/code/tensorflow/yamrnn.py)
 
